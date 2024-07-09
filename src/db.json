@@ -1,0 +1,30 @@
+{
+  "usuarios": [
+    {
+      "usuario": "test1",
+      "password": "test1",
+      "id": "1496"
+    },
+    {
+      "id": "6046",
+      "usuario": "Test2",
+      "password": "test2"
+    }
+  ],
+  "atenciones": [
+    {
+      "id": "1",
+      "nombre": "test1",
+      "apellido": "test1",
+      "edad": 31,
+      "diagnostico": "paro cardíaco"
+    },
+    {
+      "id": "d0a7",
+      "nombre": "test2",
+      "apellido": "test2",
+      "edad": "33",
+      "diagnostico": "fff"
+    }
+  ]
+}

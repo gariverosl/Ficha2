@@ -1,23 +1,36 @@
 <div class="parent">
     <div class="container" [ngClass]="isSignDivVisible ? 'active' :'' " id="container">
         <div class="form-container sign-up">
-            <form >
-                <h1>Crear Cuenta</h1>
-                <input id="usuario" type="text" name="usuario" [(ngModel)]="userRegistro.userNick" placeholder="Usuario">
+            <form id="form1" [formGroup]="registerform" (ngSubmit)="onSubmitForm1()">
+                <h1>Crear Cuenta</h1>   
+                <input id="usuario" formControlName="usuario" type="text" name="usuario" placeholder="Usuario">
+                <div *ngIf="registerform.get('usuario')?.touched" class="invalid-feedback d-block">
+                    <span *ngIf="registerform.get('usuario')!.errors?.['required']" >El Usuario es obligatorio.</span>
+                    <span *ngIf="registerform.get('usuario')!.errors?.['maxlength']" >El Usuario tiene excede el máximo.</span>
+                    <span *ngIf="registerform.get('usuario')!.errors?.['minlength']" >El Usuario necesita un minimo.</span>
+                </div>
+                <input id="contraseña" type="password" formControlName="password" name="contraseña"   placeholder="Contraseña" >      
+                <div *ngIf="registerform.get('password')?.touched" class="invalid-feedback d-block" >
+                    <span *ngIf="registerform.get('password')!.errors?.['required']" >El contraseña es obligatorio.</span>
+                    <span *ngIf="registerform.get('password')!.errors?.['maxlength']" >El contraseña tiene excede el máximo.</span>
+                    <span *ngIf="registerform.get('password')!.errors?.['minlength']">El contraseña necesita un minimo.</span>
+                </div>
 
-                <input id="contraseña" type="password" name="contraseña"  [(ngModel)]="userRegistro.password" placeholder="Contraseña" >      
-
-                <button type="submit" (click)="onRegister()">Registrar</button>
+                <button type="submit">Registrar</button>
             </form >
         </div>
         <div class="form-container sign-in">
-            <form >
+            <form id="Form2" [formGroup]="loginform" (ngSubmit)="onSubmitForm2()">
                 <h1>Ingreso</h1>
-                <input id="username" [(ngModel)]="userLogin.userNick" type="text" placeholder="Usuario" name="username" required >
-
-                <input id="password" [(ngModel)]="userLogin.password" type="password" name="password"  placeholder="Contraseña" required >
-
-                <button type="submit" (click)="onLogin()" >Ingresar</button>
+                <input  type="text" formControlName="usuario" placeholder="Usuario" name="usuario" required >
+                <div *ngIf="loginform.get('usuario')?.touched" class="invalid-feedback d-block" >
+                    <span *ngIf="loginform.get('usuario')!.errors?.['required']" >El Usuario es obligatorio.</span>
+                </div>
+                <input  type="password" name="contraseña" formControlName="password" placeholder="Contraseña" required >
+                <div *ngIf="loginform.get('password')?.touched" class="invalid-feedback d-block" >
+                    <span *ngIf="loginform.get('password')!.errors?.['required']" >El contraseña es obligatorio.</span>
+                </div>
+                <button type="submit" >Ingresar</button>
             </form>
         </div>
         <div class="toggle-container">

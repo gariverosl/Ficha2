@@ -9,8 +9,8 @@
     </div>
     @if (atenList.length !== 0) {
     <div class="row">
-      @for (item of atenList; track $index) {
-      <div class="col-3">
+      
+      <div *ngFor="let item of atenList" class="col-3">
         <div class="card">
           <div class="card-header">
             <div class="row">
@@ -36,7 +36,7 @@
           </div>
         </div>
       </div>
-      }
+      
     </div>
     } @else { 
       <div class="row">
@@ -57,41 +57,62 @@
           <button type="button" class="btn-close" (click)="closeModel()"></button>
         </div>
         <div class="modal-body">
-          <div class="row">
-            <div class="col-8">
-              <label for="">Nombre</label>
-              <input type="text" [(ngModel)]="atenObj.nombre" class="form-control" placeholder="Nombre">
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-8">
-              <label for="">Apellido</label>
-              <input type="text" [(ngModel)]="atenObj.apellido" class="form-control" placeholder="Apellido">
-            </div>
-            
-          </div>
-          <div class="row">
-            <div class="col-8">
-                <label for="">Edad</label>
-                <input type="text" [(ngModel)]="atenObj.edad" class="form-control" placeholder="Edad">
+          <form id="form1" [formGroup]="registerform" >
+            <div class="row">
+              <div class="col-8">
+                <label for="">Nombre</label>
+                <input type="text" formControlName="nombre" class="form-control" placeholder="Nombre">
+                <div *ngIf="registerform.get('nombre')?.touched" class="invalid-feedback d-block">
+                  <span *ngIf="registerform.get('nombre')!.errors?.['required']">El nombre es obligatorio.</span>
+                  <span *ngIf="registerform.get('nombre')!.errors?.['maxlength']">El nombre tiene excede el máximo 32C.</span>
+                  <span *ngIf="registerform.get('nombre')!.errors?.['minlength']">El nombre necesita un minimo de 3C.</span>
+                </div>
               </div>
-          </div>
-          <div class="row">
-            <div class="col-8">
-              <label for="">Diagnostico</label>
-              <input type="text" [(ngModel)]="atenObj.diagnostico" class="form-control" placeholder="Diagnostico">
             </div>
-          </div>
-          
+            <div class="row">
+              <div class="col-8">
+                <label for="">Apellido</label>
+                <input type="text" formControlName="apellido" class="form-control" placeholder="Apellido">
+                <div *ngIf="registerform.get('apellido')?.touched" class="invalid-feedback d-block">
+                  <span *ngIf="registerform.get('apellido')!.errors?.['required']">El apellido es obligatorio.</span>
+                  <span *ngIf="registerform.get('apellido')!.errors?.['maxlength']">El apellido tiene excede el máximo 32C.</span>
+                  <span *ngIf="registerform.get('apellido')!.errors?.['minlength']">El apellido necesita un minimo de 3C.</span>
+                </div>
+              </div>     
+            </div>
+            <div class="row">
+              <div class="col-8">
+                  <label for="">Edad</label>
+                  <input type="text" formControlName="edad" class="form-control" placeholder="Edad">
+                  <div *ngIf="registerform.get('edad')?.touched" class="invalid-feedback d-block">
+                    <span *ngIf="registerform.get('edad')!.errors?.['required']">La edad es obligatorio.</span>
+                    <span *ngIf="registerform.get('edad')!.errors?.['pattern']">Solo Numeros</span>
+                    <span *ngIf="registerform.get('edad')!.errors?.['max']">La edad maxima es 120.</span>
+                    <span *ngIf="registerform.get('edad')!.errors?.['min']">La edad un minima de 0.</span>
+                  </div>
+                </div>
+            </div>
+            <div class="row">
+              <div class="col-8">
+                <label for="">Diagnostico</label>
+                <input type="text" formControlName="diagnostico" class="form-control" placeholder="Diagnostico">
+                <div *ngIf="registerform.get('diagnostico')?.touched" class="invalid-feedback d-block">
+                  <span *ngIf="registerform.get('diagnostico')!.errors?.['required']">El diagnostico es obligatorio.</span>
+                  <span *ngIf="registerform.get('diagnostico')!.errors?.['maxlength']">El diagnostico tiene excede el máximo 32C.</span>
+                  <span *ngIf="registerform.get('diagnostico')!.errors?.['minlength']">El diagnostico necesita un minimo de 3C.</span>
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-danger" (click)="closeModel()">Cerrar</button>
-          @if (atenObj.id ==0) {
-            <button type="button" class="btn btn-primary" (click)="saveAten()">Grabar</button>
+          @if (editingAtencionId == '') {
+            <button type="button" class="btn btn-primary" (click)="saveAten()" [disabled]="this.registerform.invalid" >Grabar</button>
           } @else {
-            <button type="button" class="btn btn-success" (click)="updateAten()">Modificar</button>
+            <button type="button" class="btn btn-success" (click)="updateAten()" [disabled]="this.registerform.invalid">Modificar</button>
           }
-         
+      
         </div>
       </div>
     </div>

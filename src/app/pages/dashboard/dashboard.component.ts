@@ -1,53 +1,63 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
-
+import { Router } from '@angular/router';
+import { CommonModule, NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, inject, NgModule, OnInit, ElementRef, ViewChild } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AtenService } from '../../services/aten.service';
+import { Atencion } from '../../models/atencion.model';
 /**
  * Componente del panel de control.
  */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterOutlet, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule,NgClass, NgFor, ReactiveFormsModule,NgIf],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
-  /**
-   * Referencia al elemento modal en la plantilla.
-   * @type {ElementRef | undefined}
-   */
+
+  registerform!: FormGroup;
+
+  constructor(private atenService: AtenService, private router: Router) { }
+
+  
+
   @ViewChild('myModal') model: ElementRef | undefined;
 
-  /**
-   * Objeto de atención actual.
-   * @type {Atencion}
-   */
-  atenObj: Atencion = new Atencion();
-  
-  /**
-   * Lista de atenciones.
-   * @type {Atencion[]}
-   */
+  atenObj: Atencion | undefined;
+
   atenList: Atencion[] = [];
 
+  editingAtencionId: string = '';
 
-  /**
-   * Método de ciclo de vida que se ejecuta al inicializar el componente.
-   * Carga la lista de atenciones desde el almacenamiento local.
-   * @returns {void}
-   */
+
+
   ngOnInit(): void {
-    const localData = localStorage.getItem("atencion");
-    if(localData != null) {
-      this.atenList = JSON.parse(localData)
-    }
+    
+    this.registerform = new FormGroup({ 
+      nombre: new FormControl('', [Validators.required, Validators.maxLength(32), Validators.minLength(3)]),
+      apellido: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]),
+      edad: new FormControl('', [Validators.required, Validators.pattern('[0-9]*' ), Validators.min(0), Validators.max(120)]),
+      diagnostico: new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(32)]),
+
+    });
+    
+
+    this.loadAten();
+
+    //const localData = localStorage.getItem("atencion");
+    //if(localData != null) {
+    //  this.atenList = JSON.parse(localData)
+    //}
   }
 
-  /**
-   * Abre el modal estableciendo su estilo de display a 'block'.
-   * @returns {void}
-   */
+  loadAten() {
+    this.atenService.listAten().subscribe(response => {
+      this.atenList = response
+   });
+  }
+
   openModel() {
     
     const model = document.getElementById("myModal");
@@ -56,102 +66,64 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  /**
-   * Cierra el modal y resetea el objeto de atención.
-   * @returns {void}
-   */
+  
   closeModel() {
-    this.atenObj = new Atencion();
+    this.atenObj = undefined;
     if (this.model != null) {
       this.model.nativeElement.style.display = 'none';
     }
   }
 
-  /**
-   * Elimina una atención después de la confirmación del usuario.
-   * @param {Atencion} item - La atención a eliminar.
-   * @returns {void}
-   */
+
   onDelete(item: Atencion) {
     const isDelet = confirm("Seguro de eliminar la Atención");
     if(isDelet) {
-      const currentRecord =  this.atenList.findIndex(m=> m.id === this.atenObj.id);
-      this.atenList.splice(currentRecord,1);
-      localStorage.setItem('atencion', JSON.stringify(this.atenList));
+      //debugger;
+      this.atenService.deleteAten(item.id.toString()).subscribe(response => {
+        alert("Eliminado Correctamente");
+        this.loadAten();
+    });
+      this.closeModel();
     }
   }
 
-  /**
-   * Edita una atención, abriendo el modal y cargando la atención seleccionada.
-   * @param {Atencion} item - La atención a editar.
-   * @returns {void}
-   */
-  onEdit(item: Atencion) {
-    this.atenObj =  item;
+
+  onEdit(item : Atencion): void {
+    //console.log(id);
+   this.editingAtencionId = item.id.toString();
+   this.registerform.setValue({
+    nombre: item.nombre,
+    apellido: item.apellido,
+    edad: item.edad,
+    diagnostico: item.diagnostico
+  });
     this.openModel();
   }
 
-  /**
-   * Actualiza la atención actual en la lista y en el almacenamiento local.
-   * @returns {void}
-   */
+ 
   updateAten() {
-    const currentRecord =  this.atenList.find(m=> m.id === this.atenObj.id);
-    if(currentRecord != undefined) {
-      currentRecord.nombre = this.atenObj.nombre;
-      currentRecord.apellido =  this.atenObj.apellido;
-      currentRecord.edad =  this.atenObj.edad;
-      currentRecord.diagnostico =  this.atenObj.diagnostico;
-    };
-    localStorage.setItem('atencion', JSON.stringify(this.atenList));
+    this.atenService.updateAten(this.registerform.value, this.editingAtencionId).subscribe(response => {
+      alert("Actualizado Correctamente");
+      this.loadAten();  
+    });
+    this.editingAtencionId = '';
+    //this.editingAtencionId = undefined;
     this.closeModel()
   }
 
-  /**
-   * Guarda una nueva atención en la lista y en el almacenamiento local.
-   * @returns {void}
-   */
+
   saveAten() {
     //debugger;
-    const isLocalPresent = localStorage.getItem("atencion");
-    if (isLocalPresent != null) {
-      
-      const oldArray = JSON.parse(isLocalPresent);
-      this.atenObj.id = oldArray.length + 1;
-      oldArray.push(this.atenObj);
-      this.atenList = oldArray;
-      localStorage.setItem('atencion', JSON.stringify(oldArray));
-    } else {
-      const newArr = [];
-      newArr.push(this.atenObj);
-      this.atenObj.id = 1;
-      this.atenList = newArr;
-      localStorage.setItem('atencion', JSON.stringify(newArr));
-    }
-    this.closeModel()
+    this.atenService.saveAten(this.registerform.value).subscribe(response => {
+      alert("Registrado Correctamente");
+      this.registerform.reset();
+      this.loadAten();
+    });
+    this.closeModel();
   }
 
 
 
 }
 
-/**
- * Clase que representa una atención.
- */
-export class Atencion {
-  id: number;
-  nombre: string;
-  apellido: string;
-  edad: number;
-  diagnostico: string;
 
-
-  constructor() {
-    this.id = 0;
-    this.nombre = '';
-    this.apellido = '';
-    this.edad = 0;
-    this.diagnostico = '';
-
-  }
-}
